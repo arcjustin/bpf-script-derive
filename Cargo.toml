@@ -1,0 +1,21 @@
+[package]
+name = "btf-derive"
+version = "0.3.0"
+edition = "2021"
+categories = ["parser-implementations", "data-structures"]
+homepage = "https://github.com/arcjustin/btf-derive"
+keywords = ["linux", "btf", "bpf", "parser", "ebpf" ]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/arcjustin/btf-derive"
+description = "Macros for the btf crate."
+
+[dependencies]
+btf = "0.3.0"
+darling = "0.14.1"
+quote = "1.0"
+regex = "1.6.0"
+syn = "1.0"
+
+[lib]
+proc-macro = true
