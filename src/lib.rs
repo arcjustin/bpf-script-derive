@@ -50,10 +50,13 @@ pub fn derive_add_to_bpf(input: TokenStream) -> TokenStream {
                     fields.push(quote! {(#field_name, stringify!(#field_type_name))});
                 } else {
                     let ty = field.ty;
+                    let type_name = quote! {#ty}.to_string();
+                    let re = Regex::new(r"^\[\s*([^ ;]+)\s*;\s*(\d+)\s*\]$").expect("Bad regex");
+                    let type_name = re.replace(&type_name, r"[$1; $2]");
                     auto_types.push(quote! {
                         <#ty>::add_to_btf(btf)?;
                     });
-                    fields.push(quote! {(#field_name, stringify!(#ty))})
+                    fields.push(quote! {(#field_name, #type_name)})
                 }
             }
         }
