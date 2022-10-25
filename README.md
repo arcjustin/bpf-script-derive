@@ -1,18 +1,18 @@
 # btf-derive
-## Description
-Provides various macros for the btf crate.
+[![Build Status](https://github.com/arcjustin/btf-derive/workflows/build/badge.svg)](https://github.com/arcjustin/btf-derive/actions?query=workflow%3Abuild)
+[![crates.io](https://img.shields.io/crates/v/btf-derive.svg)](https://crates.io/crates/btf-derive)
+[![mio](https://docs.rs/btf-derive/badge.svg)](https://docs.rs/btf-derive/)
+[![Lines of Code](https://tokei.rs/b1/github/arcjustin/btf-derive?category=code)](https://tokei.rs/b1/github/arcjustin/btf-derive?category=code)
 
-## Example
-```rust
-use btf::{AddToBtf, BtfTypes};
-use btf_derive::AddToBtf;
+Provides derive macros for the `btf` crate.
 
-#[derive(AddToBtf)]
-struct MyNewType {
-    pub a: u32,
-    pub b: u64,
-}
+## Usage
 
-let mut btf = BtfTypes::default();
-MyNewType::add_to_btf(&mut btf).expect("Failed to add type.");
-```
+For usage examples, see code located in [examples/](examples/) :
+
+  | Examples | Description |
+  |----------|-------------|
+  |[custom-type](examples/custom-type.rs)| Creates and inserts a custom type into an empty BTF database|
+
+## TODO
+- Add proper error types.
