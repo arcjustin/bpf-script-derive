@@ -11,7 +11,7 @@ repository = "https://github.com/arcjustin/btf-derive"
 description = "Macros for the btf crate."
 
 [dependencies]
-btf = "0.3.0"
+btf = "0.3.1"
 darling = "0.14.1"
 quote = "1.0"
 regex = "1.6.0"
