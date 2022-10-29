@@ -13,6 +13,8 @@ struct CustomStructure {
     pub _i32: i32,
     pub _i64: i64,
     pub _array: [u8; 10],
+    pub _array2d: [[u8; 32]; 10],
+    pub _array3d: [[[u32; 100]; 32]; 10],
 }
 
 fn main() {
@@ -22,5 +24,11 @@ fn main() {
         .resolve_type_by_name("CustomStructure")
         .expect("New type wasn't added.");
 
+    btf.get_type_by_name("[u8; 10]")
+        .expect("inner type wasn't added");
+    btf.get_type_by_name("[[u8; 32]; 10]")
+        .expect("inner type wasn't added");
+    btf.get_type_by_name("[[[u32; 100]; 32]; 10]")
+        .expect("inner type wasn't added");
     println!("{:#?}", custom_type);
 }
