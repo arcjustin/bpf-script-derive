@@ -53,6 +53,8 @@ pub fn derive_add_to_bpf(input: TokenStream) -> TokenStream {
     }
 
     let gen = quote! {
+        // This should be `::btf::AddToBtf` which will make sure it's
+        // referencing the trait from the `btf` crate.
         impl AddToBtf for #name {
             fn add_to_btf(btf: &mut btf::BtfTypes) -> Option<&btf::types::Type> {
                 const STRUCT_FIELDS: &[(&str, &str)] = &[#(#fields),*];
