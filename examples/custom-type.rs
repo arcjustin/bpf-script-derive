@@ -1,4 +1,4 @@
-use bpf_script::{AddToTypeDatabase, TypeDatabase};
+use bpf_script::types::{AddToTypeDatabase, TypeDatabase};
 use bpf_script_derive::AddToTypeDatabase;
 
 #[repr(C, align(1))]

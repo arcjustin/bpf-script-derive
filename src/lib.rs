@@ -52,8 +52,8 @@ pub fn derive_add_to_database(input: TokenStream) -> TokenStream {
     }
 
     let gen = quote! {
-        impl bpf_script::AddToTypeDatabase for #name {
-            fn add_to_database(database: &mut bpf_script::TypeDatabase) -> bpf_script::Result<usize> {
+        impl bpf_script::types::AddToTypeDatabase for #name {
+            fn add_to_database(database: &mut bpf_script::types::TypeDatabase) -> bpf_script::error::Result<usize> {
                 const STRUCT_FIELDS: &[(&str, &str)] = &[#(#fields),*];
                 #(#inner_types)*
                 database.add_struct_by_names(Some(stringify!(#name)), STRUCT_FIELDS)

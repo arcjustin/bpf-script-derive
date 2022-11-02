@@ -11,7 +11,7 @@ repository = "https://github.com/arcjustin/bpf-script-derive"
 description = "Macros for the bpf-script crate."
 
 [dependencies]
-bpf-script = "0.4"
+bpf-script = "0.5"
 darling = "0.14.1"
 proc-macro2 = "1.0.47"
 quote = "1.0"
