@@ -4,7 +4,7 @@
 [![mio](https://docs.rs/bpf-script-derive/badge.svg)](https://docs.rs/bpf-script-derive/)
 [![Lines of Code](https://tokei.rs/b1/github/arcjustin/bpf-script-derive?category=code)](https://tokei.rs/b1/github/arcjustin/bpf-script-derive?category=code)
 
-Provides derive macros for the `btf` crate.
+Provides a derive macro for `AddToDatabase` to make adding Rust types to a `bpf_script::types::TypeDatabase` easier.
 
 ## Usage
 
