@@ -12,53 +12,51 @@ fn canonicalized_type_name(ty: &Type) -> String {
     re.replace_all(&type_name, r"; ").to_string()
 }
 
-/// Recursively adds inner types to the auto_types list.
-fn add_type(ty: &Type, auto_types: &mut Vec<TokenStream2>) {
+/// Recursively adds inner types to the inner_types list.
+fn add_type(ty: &Type, inner_types: &mut Vec<TokenStream2>) {
     match ty {
-        Type::Array(a) => add_type(&a.elem, auto_types),
+        Type::Array(a) => add_type(&a.elem, inner_types),
         Type::Tuple(t) => {
             for elem in &t.elems {
-                add_type(elem, auto_types);
+                add_type(elem, inner_types);
             }
         }
         _ => (),
     }
 
-    auto_types.push(quote! {
-        <#ty>::add_to_btf(btf)?;
+    inner_types.push(quote! {
+        <#ty>::add_to_database(database)?;
     });
 }
 
-/// Implements AddToBtf for the type. If the type is a structure, it will
-/// create a new BTF type for the structure with the same name and all its
-/// inner field types.
-#[proc_macro_derive(AddToBtf, attributes(field))]
-pub fn derive_add_to_bpf(input: TokenStream) -> TokenStream {
+/// Implements AddToTypeDatabase for the type. If the type is a structure, it will
+/// create a new type for the structure with the same name and all its inner fields.
+#[proc_macro_derive(AddToTypeDatabase, attributes(field))]
+pub fn derive_add_to_database(input: TokenStream) -> TokenStream {
     let input: DeriveInput = parse_macro_input!(input);
     let name = &input.ident;
 
-    let mut auto_types = vec![];
+    let mut inner_types = vec![];
     let mut fields = vec![];
     match input.data {
         syn::Data::Struct(s) => {
             for field in s.fields {
                 let field_name = field.ident.expect("Field has no name").to_string();
                 let ty = field.ty;
-                add_type(&ty, &mut auto_types);
+                add_type(&ty, &mut inner_types);
                 let type_name = canonicalized_type_name(&ty);
-                fields.push(quote! {(#field_name, #type_name)})
+                fields.push(quote! {(#field_name, #type_name)});
             }
         }
         _ => panic!("Not a structure."),
     }
 
     let gen = quote! {
-        impl AddToBtf for #name {
-            fn add_to_btf(btf: &mut btf::BtfTypes) -> Option<&btf::types::Type> {
+        impl bpf_script::AddToTypeDatabase for #name {
+            fn add_to_database(database: &mut bpf_script::TypeDatabase) -> bpf_script::Result<usize> {
                 const STRUCT_FIELDS: &[(&str, &str)] = &[#(#fields),*];
-                usize::add_to_btf(btf)?;
-                #(#auto_types)*
-                btf.add_struct(stringify!(#name), STRUCT_FIELDS)
+                #(#inner_types)*
+                database.add_struct_by_names(Some(stringify!(#name)), STRUCT_FIELDS)
             }
         }
     };

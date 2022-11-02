@@ -1,8 +1,8 @@
-# btf-derive
-[![Build Status](https://github.com/arcjustin/btf-derive/workflows/build/badge.svg)](https://github.com/arcjustin/btf-derive/actions?query=workflow%3Abuild)
-[![crates.io](https://img.shields.io/crates/v/btf-derive.svg)](https://crates.io/crates/btf-derive)
-[![mio](https://docs.rs/btf-derive/badge.svg)](https://docs.rs/btf-derive/)
-[![Lines of Code](https://tokei.rs/b1/github/arcjustin/btf-derive?category=code)](https://tokei.rs/b1/github/arcjustin/btf-derive?category=code)
+# bpf-script-derive
+[![Build Status](https://github.com/arcjustin/bpf-script-derive/workflows/build/badge.svg)](https://github.com/arcjustin/bpf-script-derive/actions?query=workflow%3Abuild)
+[![crates.io](https://img.shields.io/crates/v/bpf-script-derive.svg)](https://crates.io/crates/bpf-script-derive)
+[![mio](https://docs.rs/bpf-script-derive/badge.svg)](https://docs.rs/bpf-script-derive/)
+[![Lines of Code](https://tokei.rs/b1/github/arcjustin/bpf-script-derive?category=code)](https://tokei.rs/b1/github/arcjustin/bpf-script-derive?category=code)
 
 Provides derive macros for the `btf` crate.
 

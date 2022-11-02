@@ -1,17 +1,17 @@
 [package]
-name = "btf-derive"
+name = "bpf-script-derive"
 version = "0.3.2"
 edition = "2021"
 categories = ["parser-implementations", "data-structures"]
-homepage = "https://github.com/arcjustin/btf-derive"
-keywords = ["linux", "btf", "bpf", "parser", "ebpf" ]
+homepage = "https://github.com/arcjustin/bpf-script-derive"
+keywords = ["linux", "script", "bpf", "parser", "ebpf" ]
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/arcjustin/btf-derive"
-description = "Macros for the btf crate."
+repository = "https://github.com/arcjustin/bpf-script-derive"
+description = "Macros for the bpf-script crate."
 
 [dependencies]
-btf = "0.3.2"
+bpf-script = "0.4"
 darling = "0.14.1"
 proc-macro2 = "1.0.47"
 quote = "1.0"

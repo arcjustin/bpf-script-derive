@@ -1,8 +1,8 @@
-use btf::{AddToBtf, BtfTypes};
-use btf_derive::AddToBtf;
+use bpf_script::{AddToTypeDatabase, TypeDatabase};
+use bpf_script_derive::AddToTypeDatabase;
 
 #[repr(C, align(1))]
-#[derive(AddToBtf)]
+#[derive(AddToTypeDatabase)]
 struct CustomStructure {
     pub _u8: u8,
     pub _u16: u16,
@@ -18,17 +18,22 @@ struct CustomStructure {
 }
 
 fn main() {
-    let mut btf = BtfTypes::default();
-    CustomStructure::add_to_btf(&mut btf).expect("Failed to add CustomStructure to btf.");
-    let custom_type = btf
-        .resolve_type_by_name("CustomStructure")
-        .expect("New type wasn't added.");
+    let mut database = TypeDatabase::default();
+    CustomStructure::add_to_database(&mut database)
+        .expect("Failed to add CustomStructure to type database.");
 
-    btf.get_type_by_name("[u8; 10]")
+    database
+        .get_type_by_name("CustomStructure")
+        .expect("New type wasn't added.");
+    database
+        .get_type_by_name("[u8; 10]")
         .expect("inner type wasn't added");
-    btf.get_type_by_name("[[u8; 32]; 10]")
+    database
+        .get_type_by_name("[[u8; 32]; 10]")
         .expect("inner type wasn't added");
-    btf.get_type_by_name("[[[u32; 100]; 32]; 10]")
+    database
+        .get_type_by_name("[[[u32; 100]; 32]; 10]")
         .expect("inner type wasn't added");
-    println!("{:#?}", custom_type);
+
+    println!("{:#?}", database);
 }
