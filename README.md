@@ -13,6 +13,3 @@ For usage examples, see code located in [examples/](examples/) :
   | Examples | Description |
   |----------|-------------|
   |[custom-type](examples/custom-type.rs)| Creates and inserts a custom type into an empty BTF database|
-
-## TODO
-- Add proper error types.
