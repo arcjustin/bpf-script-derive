@@ -1,6 +1,6 @@
 [package]
 name = "bpf-script-derive"
-version = "0.5.2"
+version = "0.5.3"
 edition = "2021"
 categories = ["parser-implementations", "data-structures"]
 homepage = "https://github.com/arcjustin/bpf-script-derive"
@@ -11,7 +11,7 @@ repository = "https://github.com/arcjustin/bpf-script-derive"
 description = "Macros for the bpf-script crate."
 
 [dependencies]
-bpf-script = "0.5.2"
+bpf-script = "0.5.3"
 darling = "0.14.1"
 proc-macro2 = "1.0.47"
 quote = "1.0"
