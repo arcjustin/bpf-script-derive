@@ -5,14 +5,6 @@
 //!
 //! Provides a derive macro for `AddToDatabase` to make adding Rust types to a `bpf_script::types::TypeDatabase` easier.
 //!
-//! ## Usage
-//!
-//! For usage examples, see code located in [examples/](examples/) :
-//!
-//!   | Examples | Description |
-//!   |----------|-------------|
-//!   |[custom-type](examples/custom-type.rs)| Creates and inserts a custom type into an empty BTF database|
-//!
 //! ## License
 //!
 //! * [MIT license](http://opensource.org/licenses/MIT)
