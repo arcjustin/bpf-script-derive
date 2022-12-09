@@ -9,11 +9,45 @@
 //!
 //! * [MIT license](http://opensource.org/licenses/MIT)
 use proc_macro::TokenStream;
-use proc_macro2::TokenStream as TokenStream2;
-use quote::{format_ident, quote};
+use proc_macro2::{Span, TokenStream as TokenStream2};
+use quote::{format_ident, quote, quote_spanned, ToTokens, TokenStreamExt};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
-use syn::{parse_macro_input, DeriveInput, Type};
+use syn::spanned::Spanned;
+use syn::{parse_macro_input, parse_quote, Field, Ident, LitStr, Path, Type};
+
+use darling::FromDeriveInput;
+
+fn default_crate_root() -> Path {
+    parse_quote!(::bpf_script)
+}
+
+#[derive(FromDeriveInput)]
+#[darling(supports(struct_named))]
+struct Receiver {
+    ident: Ident,
+    data: darling::ast::Data<(), Field>,
+    /// The root to use for absolute imports.
+    #[darling(rename = "crate", default = "default_crate_root")]
+    crate_root: Path,
+}
+
+struct TypeRegistration<'a> {
+    ty: &'a Type,
+    database: &'a Ident,
+}
+
+impl ToTokens for TypeRegistration<'_> {
+    fn to_tokens(&self, tokens: &mut TokenStream2) {
+        let Self { ty, database } = self;
+        let name = local_ident(ty);
+        // Set the span of the entire declaration to the type, so that a compile error
+        // due to a missing trait impl will correctly point to the offending type.
+        tokens.append_all(quote_spanned! {ty.span()=>
+            let #name = <#ty>::add_to_database(#database)?;
+        })
+    }
+}
 
 /// Hashes a given value.
 fn calculate_hash<T: Hash>(t: &T) -> u64 {
@@ -22,52 +56,76 @@ fn calculate_hash<T: Hash>(t: &T) -> u64 {
     s.finish()
 }
 
-/// Recursively adds inner types to the inner_types list.
-fn add_type(ty: &Type, inner_types: &mut Vec<TokenStream2>) {
+fn local_ident(ty: &Type) -> Ident {
+    let mut ident = format_ident!("local_{}", calculate_hash(ty));
+    ident.set_span(ty.span());
+    ident
+}
+
+/// Recursively adds inner types to the set of types for the database.
+fn add_type<'a>(ty: &'a Type, set: &mut Vec<&'a Type>) {
     match ty {
-        Type::Array(a) => add_type(&a.elem, inner_types),
+        Type::Array(a) => add_type(&a.elem, set),
         Type::Tuple(t) => {
             for elem in &t.elems {
-                add_type(elem, inner_types);
+                add_type(elem, set);
             }
         }
         _ => (),
-    }
+    };
 
-    let local_name = format_ident!("local_{}", calculate_hash(&ty));
-    inner_types.push(quote! {
-        let #local_name = <#ty>::add_to_database(database)?;
-    });
+    set.push(ty);
 }
 
 /// Implements AddToTypeDatabase for the type. If the type is a structure, it will
 /// create a new type for the structure with the same name and all its inner fields.
 #[proc_macro_derive(AddToTypeDatabase, attributes(field))]
 pub fn derive_add_to_database(input: TokenStream) -> TokenStream {
-    let input: DeriveInput = parse_macro_input!(input);
-    let name = &input.ident;
+    let receiver = match Receiver::from_derive_input(&parse_macro_input!(input)) {
+        Ok(v) => v,
+        Err(e) => return e.write_errors().into(),
+    };
 
-    let mut inner_types = vec![];
+    // A list of all the types that are being registered with the database.
+    // This list can deliberately include duplicates; these will end up
+    // being shadowed variables. This duplication is needed because each
+    // occurrence of a type will have a distinct span where the type was
+    // encountered in the input, and deduping the types would only result
+    // in the first occurrence of the type getting a compile error.
+    let mut types = vec![];
     let mut fields = vec![];
-    match input.data {
-        syn::Data::Struct(s) => {
-            for field in s.fields {
-                let field_name = field.ident.expect("Field has no name").to_string();
-                let ty = field.ty;
-                add_type(&ty, &mut inner_types);
-                let local_name = format_ident!("local_{}", calculate_hash(&ty));
-                fields.push(quote! {(#field_name, #local_name)});
-            }
-        }
-        _ => panic!("Not a structure."),
+    for Field { ident, ty, .. } in receiver
+        .data
+        .as_ref()
+        .take_struct()
+        .expect("Only named structs supported")
+    {
+        add_type(ty, &mut types);
+
+        let field_name = LitStr::new(
+            &ident.as_ref().expect("Field has no name").to_string(),
+            ident.span(),
+        );
+
+        let local_name = local_ident(ty);
+
+        fields.push(quote! {(#field_name, #local_name)});
     }
 
+    let name = &receiver.ident;
+    let crate_root = &receiver.crate_root;
+    let db_param = Ident::new("database", Span::call_site());
+    let registrations = types.iter().map(|ty| TypeRegistration {
+        ty,
+        database: &db_param,
+    });
+
     let gen = quote! {
-        impl bpf_script::types::AddToTypeDatabase for #name {
-            fn add_to_database(database: &mut bpf_script::types::TypeDatabase) -> bpf_script::error::Result<usize> {
-                #(#inner_types)*
-                let struct_fields = [#(#fields),*].to_vec();
-                database.add_struct_by_ids(Some(stringify!(#name)), struct_fields.as_slice())
+        #[automatically_derived]
+        impl #crate_root::types::AddToTypeDatabase for #name {
+            fn add_to_database(#db_param: &mut #crate_root::types::TypeDatabase) -> #crate_root::error::Result<usize> {
+                #(#registrations)*
+                #db_param.add_struct_by_ids(Some(stringify!(#name)), &[#(#fields),*])
             }
         }
     };
