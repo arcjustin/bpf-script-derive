@@ -12,7 +12,7 @@ description = "Macros for the bpf-script crate."
 
 [dependencies]
 bpf-script = "0.5.4"
-darling = "0.14.1"
+darling = "0.20.0"
 proc-macro2 = "1.0.47"
 quote = "1.0"
 regex = "1.6.0"
